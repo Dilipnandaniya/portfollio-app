@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  ArrowDownRight, ArrowRight, ChevronRight, Code2, Download,
+  ArrowDownRight, ArrowRight, CheckCircle2, ChevronRight, Download,
   ExternalLink, Mail, Menu, Phone, Sparkles, X,
 } from 'lucide-react'
 
@@ -21,21 +21,6 @@ type Project = {
   features: string[]
   contribution: string[]
 }
-
-const categoryById: Record<string, string> = {
-  'purview-label-automation': 'Governance & automation',
-  'sharepoint-backup-archival': 'Governance & automation',
-  'sharepoint-site-provisioning': 'Governance & automation',
-  'akte-management': 'Apps & portals',
-  'construction-site-app': 'Apps & portals',
-  'weekly-meetings': 'Apps & portals',
-  'hrms-portal': 'Apps & portals',
-  'nemt-healthops': 'Apps & portals',
-  'document-catalogue': 'Search & documents',
-  'healthcare-dms': 'Search & documents',
-}
-const filters = ['All', 'Apps & portals', 'Governance & automation', 'Search & documents']
-const INITIAL_COUNT = 6
 
 const projects: Project[] = [
   {
@@ -176,9 +161,19 @@ function Logo() {
 
 function Header() {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const links = [['Work', '#work'], ['Expertise', '#expertise'], ['Experience', '#experience'], ['About', '#about']]
-  return <header className="absolute inset-x-0 top-0 z-50 px-5 pt-5 md:px-10 lg:px-14">
-    <div className="mx-auto flex max-w-[1440px] items-center justify-between rounded-full border border-black/10 bg-[#f3f2ec]/80 px-4 py-3 backdrop-blur-xl md:px-5">
+
+  return <header className="fixed inset-x-0 top-0 z-50 px-5 pt-4 md:px-10 lg:px-14">
+    <div className={`mx-auto flex max-w-[1440px] items-center justify-between rounded-full border px-4 py-3 backdrop-blur-xl transition-all duration-300 md:px-5 ${scrolled ? 'border-black/10 bg-[#f3f2ec]/90 shadow-[0_10px_40px_rgba(23,32,27,.10)]' : 'border-transparent bg-transparent'}`}>
       <Logo />
       <nav className="hidden items-center gap-8 md:flex" aria-label="Primary navigation">
         {links.map(([label, href]) => <a key={href} href={href} className="focus-ring rounded-sm text-sm font-semibold text-black/70 transition hover:text-black">{label}</a>)}
@@ -193,40 +188,98 @@ function Header() {
   </header>
 }
 
+const heroWords = ['SharePoint solutions', 'Purview automation', 'Power Platform workflows', 'Azure-powered apps', 'React + .NET products']
+
+function RotatingWord() {
+  const [i, setI] = useState(0)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const t = setInterval(() => setI(n => (n + 1) % heroWords.length), 2600)
+    return () => clearInterval(t)
+  }, [])
+  return <span className="inline-block min-h-[1.5em] align-top">
+    <span key={i} className="word-in inline-block font-bold text-[#405cff]">{heroWords[i]}</span>
+  </span>
+}
+
 function HeroVisual() {
-  return <div className="relative mx-auto aspect-[4/4.7] w-full max-w-[570px]">
-    <div className="absolute inset-[8%_3%_0_9%] rotate-3 rounded-[3rem] bg-[#d9ff3f]" />
-    <div className="noise absolute inset-[2%_8%_6%_2%] -rotate-2 overflow-hidden rounded-[3rem] bg-[#17201b] text-white shadow-[0_35px_80px_rgba(23,32,27,.2)]">
-      <div className="absolute left-[8%] top-[9%] flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.25em] text-white/55"><span className="h-2 w-2 rounded-full bg-[#d9ff3f]" /> Connected systems</div>
-      <div className="absolute inset-x-[8%] top-[21%] grid grid-cols-3 gap-3">
-        {[['365', 'ecosystem'], ['SP', 'solutions'], ['<>', 'full-stack']].map(([big, small], i) => <div key={small} className={`rounded-2xl border border-white/10 p-4 ${i === 1 ? 'bg-[#405cff]' : 'bg-white/5'}`}><div className="display text-3xl md:text-4xl">{big}</div><div className="mt-1 text-[9px] uppercase tracking-wider text-white/55">{small}</div></div>)}
+  const outcomes = [
+    { metric: '70%+', label: 'less project administration', project: 'Project Akte Management', pct: 70, color: '#d9ff3f' },
+    { metric: '60–70%', label: 'less daily reporting time', project: 'Construction Site App', pct: 65, color: '#405cff' },
+    { metric: '80%', label: 'less manual coordination', project: 'Weekly Meeting System', pct: 80, color: '#ef755f' },
+  ]
+
+  return <div className="relative mx-auto w-full max-w-[440px] lg:max-w-[460px] lg:justify-self-end">
+    <div className="absolute inset-0 translate-x-3 translate-y-3 rotate-2 rounded-[2rem] bg-[#d9ff3f]" />
+    <div className="noise relative overflow-hidden rounded-[2rem] bg-[#17201b] p-5 text-white shadow-[0_30px_70px_rgba(23,32,27,.22)] md:p-6">
+      <div className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[.22em] text-white/55">
+        <span className="flex items-center gap-2"><span className="h-2 w-2 animate-pulse rounded-full bg-[#d9ff3f]" /> Reported impact</span>
+        <span>Enterprise projects</span>
       </div>
-      <div className="absolute inset-x-[8%] bottom-[10%] top-[48%] overflow-hidden rounded-3xl bg-[#f3f2ec] p-5 text-[#17201b]">
-        <div className="mb-5 flex items-center justify-between"><span className="text-xs font-bold">One connected experience</span><span className="rounded-full bg-[#d9ff3f] px-2 py-1 text-[8px] font-bold uppercase">Live system</span></div>
-        <div className="grid grid-cols-[1fr_.7fr] gap-3">
-          <div className="rounded-2xl bg-white p-3 shadow-sm"><div className="mb-4 h-2 w-16 rounded bg-black/15"/><div className="flex h-16 items-end gap-1">{[32,58,42,73,55,88,67].map((h,i)=><span key={i} className="flex-1 rounded-t bg-[#405cff]" style={{height:`${h}%`, opacity:.45+i*.07}} />)}</div></div>
-          <div className="grid gap-2">{['#d9ff3f','#ef755f','#405cff'].map((c,i)=><div key={c} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2"><span className="h-2.5 w-2.5 rounded-full" style={{background:c}}/><span className="h-1.5 rounded bg-black/10" style={{width:`${68-i*13}%`}}/></div>)}</div>
-        </div>
+
+      <div className="grid gap-2.5">
+        {outcomes.map(o => (
+          <div key={o.project} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+            <div className="flex items-baseline justify-between gap-4">
+              <div className="display text-2xl leading-none md:text-3xl" style={{ color: o.color }}>{o.metric}</div>
+              <div className="text-right text-xs font-semibold text-white/80">{o.label}</div>
+            </div>
+            <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full" style={{ width: `${o.pct}%`, background: o.color }} />
+            </div>
+            <div className="mt-2 flex items-center gap-1.5 text-[11px] text-white/45">
+              <CheckCircle2 size={12} className="text-[#d9ff3f]" /> {o.project}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-1.5 border-t border-white/10 pt-4">
+        {['SharePoint', 'Purview', 'Power Automate', 'Azure', 'React', '.NET'].map(t => (
+          <span key={t} className="rounded-full border border-white/15 px-2.5 py-1 text-[10px] font-semibold text-white/70">{t}</span>
+        ))}
       </div>
     </div>
-    <div className="absolute bottom-[3%] right-0 grid h-20 w-20 rotate-6 place-items-center rounded-2xl bg-[#ef755f] shadow-xl md:h-24 md:w-24"><Code2 size={34} strokeWidth={1.5} /></div>
   </div>
 }
 
 function Hero() {
-  return <section id="top" className="noise relative min-h-[860px] overflow-hidden px-5 pb-20 pt-36 md:px-10 md:pt-44 lg:px-14">
-    <div className="absolute -left-20 top-28 h-72 w-72 rounded-full bg-[#405cff]/10 blur-3xl" />
-    <div className="mx-auto grid max-w-[1440px] items-center gap-14 lg:grid-cols-[1.08fr_.92fr]">
+  const stats = [['5+', 'Years of experience'], ['10', 'Projects delivered'], ['6', 'M365 & Azure services']]
+  return <section id="top" className="noise relative overflow-hidden px-5 pb-14 pt-24 md:px-10 md:pb-16 md:pt-28 lg:px-14">
+    <div className="absolute -left-24 top-20 h-64 w-64 rounded-full bg-[#405cff]/10 blur-3xl" />
+    <div className="absolute -right-24 bottom-0 h-56 w-56 rounded-full bg-[#d9ff3f]/30 blur-3xl" />
+
+    <div className="mx-auto grid w-full max-w-[1440px] items-center gap-10 lg:grid-cols-[1.1fr_.9fr] lg:gap-12">
       <div className="relative z-10">
-        <div className="mb-8 flex items-center gap-3 text-xs font-bold uppercase tracking-[.18em] text-black/55"><span className="h-px w-9 bg-black/35" /> M365 · SharePoint · Purview · Full-stack</div>
-        <h1 className="display max-w-[850px] text-[clamp(4rem,8.2vw,8.4rem)] leading-[.84]">Complex systems.<br/><span className="italic text-[#405cff]">Clear</span> experiences.</h1>
-        <p className="mt-8 max-w-xl text-lg leading-relaxed text-black/60 md:text-xl">I’m Dilip Nandaniya, a Microsoft 365 and SharePoint developer with 5+ years of experience building enterprise solutions across Purview, Power Platform, Azure, React and .NET.</p>
-        <div className="mt-10 flex flex-wrap gap-3">
-          <a href="#work" className="focus-ring inline-flex items-center gap-3 rounded-full bg-[#17201b] px-7 py-4 font-bold text-white transition hover:bg-[#405cff]">Explore my work <ArrowDownRight size={18}/></a>
-          <a href="/resume/Dilip_Nandaniya_Resume.pdf" target="_blank" rel="noreferrer" className="focus-ring inline-flex items-center gap-3 rounded-full border border-black/20 bg-white/50 px-7 py-4 font-bold transition hover:bg-white">Download resume <Download size={18}/></a>
+        <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-3.5 py-1.5 text-xs font-bold text-black/65 backdrop-blur">
+          <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60" /><span className="relative h-2 w-2 rounded-full bg-green-500" /></span>
+          Available for new opportunities
         </div>
-        <div className="mt-14 flex items-center gap-5 border-t border-black/10 pt-5 text-sm text-black/55"><span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-green-500" /> 5+ years of experience</span><span className="hidden h-4 w-px bg-black/15 sm:block"/><span className="hidden sm:block">Gujarat, India · Working globally</span></div>
+
+        <h1 className="display text-[clamp(2.4rem,4.4vw,4.2rem)] leading-[1.02] tracking-[-0.03em]">
+          Complex systems.<br /><span className="italic text-[#405cff]">Clear</span> experiences.
+        </h1>
+
+        <p className="mt-4 text-base text-black/70 md:text-lg">Currently building <RotatingWord /></p>
+
+        <p className="mt-3 max-w-[32rem] text-sm leading-relaxed text-black/55 md:text-base">
+          I’m Dilip Nandaniya, a Microsoft 365 and SharePoint developer turning governance, workflows and data into tools people enjoy using.
+        </p>
+
+        <div className="mt-6 flex flex-wrap items-center gap-2.5">
+          <a href="#work" className="focus-ring group inline-flex items-center gap-2.5 rounded-full bg-[#17201b] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#405cff]">View case studies <ArrowDownRight size={17} className="transition group-hover:rotate-[-45deg]" /></a>
+          <a href="#contact" className="focus-ring inline-flex items-center gap-2.5 rounded-full bg-[#d9ff3f] px-6 py-3 text-sm font-bold text-[#17201b] transition hover:brightness-95">Let’s talk <ArrowRight size={17} /></a>
+          <a href="/resume/Dilip_Nandaniya_Resume.pdf" target="_blank" rel="noreferrer" className="focus-ring inline-flex items-center gap-2 rounded-full px-3 py-3 text-sm font-bold underline-offset-4 hover:underline">Resume <Download size={15} /></a>
+        </div>
+
+        <dl className="mt-8 grid max-w-md grid-cols-3 gap-5 border-t border-black/10 pt-5">
+          {stats.map(([n, l]) => <div key={l}>
+            <dt className="display text-3xl md:text-4xl">{n}</dt>
+            <dd className="mt-1 text-[11px] leading-snug text-black/50">{l}</dd>
+          </div>)}
+        </dl>
       </div>
+
       <HeroVisual />
     </div>
   </section>
@@ -262,6 +315,21 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
     </div>
   </div>
 }
+
+const categoryById: Record<string, string> = {
+  'purview-label-automation': 'Governance & automation',
+  'sharepoint-backup-archival': 'Governance & automation',
+  'sharepoint-site-provisioning': 'Governance & automation',
+  'akte-management': 'Apps & portals',
+  'construction-site-app': 'Apps & portals',
+  'weekly-meetings': 'Apps & portals',
+  'hrms-portal': 'Apps & portals',
+  'nemt-healthops': 'Apps & portals',
+  'document-catalogue': 'Search & documents',
+  'healthcare-dms': 'Search & documents',
+}
+const filters = ['All', 'Apps & portals', 'Governance & automation', 'Search & documents']
+const INITIAL_COUNT = 6
 
 function Work() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
