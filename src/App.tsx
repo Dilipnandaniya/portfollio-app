@@ -22,6 +22,21 @@ type Project = {
   contribution: string[]
 }
 
+const categoryById: Record<string, string> = {
+  'purview-label-automation': 'Governance & automation',
+  'sharepoint-backup-archival': 'Governance & automation',
+  'sharepoint-site-provisioning': 'Governance & automation',
+  'akte-management': 'Apps & portals',
+  'construction-site-app': 'Apps & portals',
+  'weekly-meetings': 'Apps & portals',
+  'hrms-portal': 'Apps & portals',
+  'nemt-healthops': 'Apps & portals',
+  'document-catalogue': 'Search & documents',
+  'healthcare-dms': 'Search & documents',
+}
+const filters = ['All', 'Apps & portals', 'Governance & automation', 'Search & documents']
+const INITIAL_COUNT = 6
+
 const projects: Project[] = [
   {
     id: 'purview-label-automation', index: '01', title: 'Purview label automation',
@@ -250,19 +265,77 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
 
 function Work() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [filter, setFilter] = useState('All')
+  const [showAll, setShowAll] = useState(false)
+
+  const filtered = projects.filter(p => filter === 'All' || categoryById[p.id] === filter)
+  const visible = showAll ? filtered : filtered.slice(0, INITIAL_COUNT)
+  const hiddenCount = filtered.length - visible.length
+
   return <section id="work" className="bg-[#f3f2ec] px-5 py-24 md:px-10 md:py-32 lg:px-14">
     <div className="mx-auto max-w-[1440px]">
-      <div className="reveal mb-14 grid gap-6 md:grid-cols-[1fr_.75fr] md:items-end"><div><div className="mb-4 text-xs font-black uppercase tracking-[.18em] text-[#405cff]">Selected case studies</div><h2 className="display text-5xl leading-none md:text-7xl">Solutions in practice.</h2></div><p className="max-w-xl text-base leading-relaxed text-black/55 md:text-lg">Enterprise systems shaped around real operational challenges. Select any project to explore the problem, solution, capabilities, contribution and outcome.</p></div>
-      <div className="grid gap-7 lg:grid-cols-2">
-        {projects.map((project, i) => <article key={project.id} className={`project-card reveal overflow-hidden rounded-[2.25rem] border border-black/10 bg-white ${i === 0 ? 'lg:col-span-2' : ''}`}>
-          <button type="button" onClick={() => setSelectedProject(project)} aria-haspopup="dialog" className={`focus-ring group grid h-full w-full text-left ${i === 0 ? 'lg:grid-cols-[.82fr_1.18fr]' : ''}`}>
-            <div className={`relative min-h-[320px] overflow-hidden bg-[#17201b] md:min-h-[410px] ${i === 0 ? 'lg:order-2' : ''}`}><img src={project.image} alt={`Concept interface for ${project.title}`} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.035]"/><div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/15"/><span className="absolute left-6 top-6 rounded-full bg-white/90 px-3 py-2 text-[10px] font-black tracking-[.14em] text-[#17201b] backdrop-blur">{project.index} / PROJECT</span></div>
-            <div className={`flex min-h-[360px] flex-col p-7 md:p-10 ${i === 0 ? 'lg:min-h-[430px] lg:justify-center' : ''}`}><div className="mb-7 text-xs font-bold uppercase tracking-[.14em] text-black/40">{project.type}</div><h3 className="display text-4xl leading-[.95] md:text-5xl">{project.title}</h3><p className="mt-5 max-w-xl leading-relaxed text-black/55">{project.summary}</p><div className="mt-6 border-l-2 border-[#405cff] pl-4 text-sm font-bold leading-relaxed text-black/75">{project.impact}</div><div className="mt-6 flex flex-wrap gap-2">{project.tags.map(tag => <span key={tag} className="rounded-full border border-black/10 bg-[#f3f2ec] px-3 py-1.5 text-xs font-bold">{tag}</span>)}</div><div className="mt-auto flex items-center justify-between border-t border-black/10 pt-6 text-sm font-bold"><span>View enterprise case study</span><ArrowDownRight className="project-arrow transition group-hover:rotate-[-45deg]" size={22}/></div></div>
-          </button>
-        </article>)}
+      <div className="reveal mb-10 grid gap-6 md:grid-cols-[1fr_.75fr] md:items-end">
+        <div>
+          <div className="mb-4 text-xs font-black uppercase tracking-[.18em] text-[#405cff]">Selected case studies</div>
+          <h2 className="display text-5xl leading-none md:text-7xl">Solutions in practice.</h2>
+        </div>
+        <p className="max-w-xl text-base leading-relaxed text-black/55 md:text-lg">Enterprise systems shaped around real operational challenges. Select any project to explore the problem, solution and outcome.</p>
       </div>
+
+      {/* Filter chips */}
+      <div className="mb-8 flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Filter projects">
+        {filters.map(f => {
+          const count = f === 'All' ? projects.length : projects.filter(p => categoryById[p.id] === f).length
+          const active = filter === f
+          return <button key={f} role="tab" aria-selected={active}
+            onClick={() => { setFilter(f); setShowAll(false) }}
+            className={`focus-ring shrink-0 rounded-full border px-5 py-2.5 text-sm font-bold transition ${active ? 'border-[#17201b] bg-[#17201b] text-white' : 'border-black/15 bg-white/60 hover:bg-white'}`}>
+            {f} <span className={active ? 'text-[#d9ff3f]' : 'text-black/35'}>{count}</span>
+          </button>
+        })}
+      </div>
+
+      {/* Compact grid (no .reveal on cards, so filtered cards never stay hidden) */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {visible.map(project => (
+          <article key={project.id} className="project-card overflow-hidden rounded-[1.75rem] border border-black/10 bg-white">
+            <button type="button" onClick={() => setSelectedProject(project)} aria-haspopup="dialog" className="focus-ring group flex h-full w-full flex-col text-left">
+              <div className="relative aspect-[16/10] overflow-hidden bg-[#17201b]">
+                <img src={project.image} alt={`Concept interface for ${project.title}`} loading="lazy" decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <span className="absolute left-4 top-4 rounded-full bg-white/90 px-2.5 py-1.5 text-[10px] font-black tracking-[.14em] text-[#17201b] backdrop-blur">{project.index}</span>
+              </div>
+              <div className="flex flex-1 flex-col p-6">
+                <div className="mb-3 text-[11px] font-bold uppercase tracking-[.14em] text-black/40">{project.type}</div>
+                <h3 className="display text-2xl leading-[1.05] md:text-3xl">{project.title}</h3>
+                <p className="mt-3 line-clamp-2 text-sm font-semibold leading-relaxed text-black/60">{project.impact}</p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {project.tags.slice(0, 3).map(tag => <span key={tag} className="rounded-full border border-black/10 bg-[#f3f2ec] px-2.5 py-1 text-[11px] font-bold">{tag}</span>)}
+                  {project.tags.length > 3 && <span className="px-1 py-1 text-[11px] font-bold text-black/40">+{project.tags.length - 3}</span>}
+                </div>
+                <div className="mt-auto flex items-center justify-between pt-5 text-sm font-bold">
+                  <span>View case study</span>
+                  <ArrowDownRight className="transition group-hover:-rotate-45 group-hover:text-[#405cff]" size={20} />
+                </div>
+              </div>
+            </button>
+          </article>
+        ))}
+      </div>
+
+      {/* Show more / less */}
+      {filtered.length > INITIAL_COUNT && (
+        <div className="mt-10 flex justify-center">
+          <button onClick={() => setShowAll(!showAll)}
+            className="focus-ring inline-flex items-center gap-3 rounded-full border border-black/20 bg-white/60 px-7 py-4 font-bold transition hover:bg-white">
+            {showAll ? 'Show fewer projects' : `Show ${hiddenCount} more projects`}
+            <ArrowDownRight size={18} className={showAll ? 'rotate-180' : ''} />
+          </button>
+        </div>
+      )}
     </div>
-    {selectedProject && <CaseStudyModal project={selectedProject} onClose={() => setSelectedProject(null)}/>}
+    {selectedProject && <CaseStudyModal project={selectedProject} onClose={() => setSelectedProject(null)} />}
   </section>
 }
 
